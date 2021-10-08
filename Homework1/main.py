@@ -1,66 +1,140 @@
 # Import XML
-from typing import NoReturn
-import xml.etree.ElementTree as XET
-
-Abstra = []
-filename = input ('Please input file name:')
-tree = XET.parse(filename)
-root = tree.getroot()
-
-#尋找tag為ArticleTitle，為文章標題
-for elem in tree.iter(tag='ArticleTitle'):
-    PaperTitle = elem.text
-
-
-#尋找tag為AbstractText，因為文章的粗體字為label先判別是否存在而加入
-#列表為Abstra
-labelnum = 0
-for elem in tree.iter(tag='AbstractText'):
-    if elem.attrib != {}:
-        label = elem.attrib['Label']
-        Abstra.append(label)
-        labelnum += 1  #標籤通常為大綱，不算句子，統計之後扣除
-    
-    #因為內文中有上下標造成subelement，用
-    #join忽略上下標直接接起來''為不加空格
-    #itertext來忽略subelement，缺點：上下標格式消失(未解問題)
-    Abstra.append(''.join(elem.itertext()))
-    
-    
-#斷句分析，統計句數
 import re
-NumofSentence = 0
-#將每一句個別放入list中
-Pool = []
-
-for section in Abstra:
-    #原文在https://newbedev.com/python-regex-for-splitting-text-into-sentences-sentence-tokenizing
-    m = re.split(r'(?<=[^A-Z].[.?]) +(?=[A-Z])', section)
-    for i in m:
-        print (i)
-        print ("\n")
-        Pool.append(i)
-        #計算句數
-        NumofSentence += 1
-print ('The number of sentences is ' , (NumofSentence -labelnum))
+import xml.etree.ElementTree as XET
+import json
+import os.path as path
 
 
-# 文字反白處理
-search = input('Please enter the keywords:').split()
+def process(content):
+    # 斷句統計
+    # 原文在https://newbedev.com/python-regex-for-splitting-text-into-sentences-sentence-tokenizing
+    m = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', content)
+    return len(m)
 
-#sorting(如果做substring搜尋時候也許會用到)
-searchsort = sorted(search, key = lambda i:len(i), reverse=True)
-print (searchsort)
 
-#暴力拆分文字
-for section in Abstra:
-    #將每一段字個別拆開·非英文或者是數字的文字作分隔並且保留
-    words =re.split(r'(\W|\s)',section)
-    collect=""
-    for identify in words:
+def asciicount(content):
+    #ASCII編碼字元數0-127
+    counter =0
+    for i in content:
+        if ord(i) < 128:
+            counter += 1
+    return counter
+
+
+def remark(searchsort, content):    # 文字反白處理
+    p = re.split(r'(\b)', content)
+    # 拆分文字
+    for word in p:
+        mark = 0
         for searchelem in searchsort:
-        #全部都轉成小寫辨認，若為真則照原來格式加上反白·避免大小寫格式喪失
-            if searchelem.lower() == identify.lower(): 
-                identify=identify.replace(identify,'\033[10;30;47m'+identify+'\033[0m')       
-        collect = collect+identify
-    print (collect + '\n')
+            if searchelem == word:  # 完全符合
+                mark = 1
+            elif searchelem.title() == word:  # 句首首字大寫的可能
+                mark = 1
+        if mark == 0:
+            print(word+'\033[0m', end='')
+        if mark == 1:
+            mark = 0
+            print('\033[10;30;47m'+word+'\033[0m', end='')
+
+
+def tweetsdisp(tweet, search):
+    """try to display tweets in readable condition"""
+    tweetobj = []
+    tweetobj.append(tweet['username'])
+    tweetobj.append(tweet['full_name'])
+    tweetobj.append(tweet['tweet_text'])
+    tweetobj.append(tweet['tweet_time'])
+
+    print('ScreenName=@', end='')
+    remark(search,tweetobj[0])
+    print('\nUsername=', end='')
+    remark(search,tweetobj[1])
+    print('\nText=')
+    remark(search, tweetobj[2])
+    print('\nCreated time:', tweetobj[3])
+
+    print('\n'+'************************')
+    print('The number of "Complete" sentences in tweet_text is', process(tweetobj[2]))
+    print('The ASCII characters of tweet_text:', asciicount(tweetobj[2]))
+    print('Words in tweet_text (encoded by ASCII)', len((tweetobj[2].encode(encoding='ascii', errors='ignore')).split()))
+
+    print('-----------------\n')
+
+
+def _mainxml(filename, search):
+    tree = XET.parse(filename)
+    root = tree.getroot()
+    paper = []  # 文章list
+    paperstructure = []  # 文章標題：有其必要保留
+
+    for child in root.findall('./PubmedArticle'):
+        pool = []
+        poolstructure = ['TITLE']
+        papertitle = child.find('.//ArticleTitle').text
+        pool.append(papertitle)
+        for grandchild in child.iter(tag='AbstractText'):
+            if grandchild.attrib != {}:
+                label = grandchild.attrib['Label']
+                poolstructure.append(label)
+            abstract = ''.join(grandchild.itertext())
+            pool.append(abstract)
+        paper.append(pool)
+        paperstructure.append(poolstructure)
+
+    count = 0  # PAPER編號
+    for quantity in paper:
+        NumofSentence = 0  # 句數統計
+        Numofword = 0      # 字數統計
+        Numofascii = 0     # ASCII字元統計
+        section = 0  # 段落編號
+
+        for x in quantity:
+            Numofword += len(x.split())
+            Numofascii += asciicount(x)
+            if section == 0:
+                print(paperstructure[count][section])  # 列印標題
+                remark(search, x)
+                
+                print('\n')
+                print('Abstract:'+'\n')
+
+            elif section > 0:
+                if len(paperstructure[count]) > 1:  # 判斷是否還有短文段落標題
+                    print(paperstructure[count][section])
+                NumofSentence += process(x)
+                remark(search, x)
+                print('\n')
+            section += 1
+        count += 1
+        print('***********************************************************************')
+        print('The number of sentences is (title excluded) ', NumofSentence)
+        print('The word number in article  is (label excluded)', Numofword)
+        print('ASCII encoding characters of whole abstrat:', Numofascii)
+        print('\n')
+
+
+def _mainjson(filename, search):
+    # 用UTF-8編碼打開.json檔案
+    with open(filename, encoding='UTF-8') as f:
+        content = json.load(f, strict=False)
+    
+    if type(content) == list:
+        for sub in content:
+            subdict = dict(sub)
+            tweetsdisp(subdict, search)
+
+
+# Start here!
+filename = input('Please enter the filename:').rstrip()
+search = input('Please enter the keywords:').split()
+searchsort = sorted(search, key=lambda i: len(i), reverse=False)
+
+if path.exists(filename) == False:
+    print('File not existed!')
+
+elif filename.rfind('.xml') != -1:
+    _mainxml(filename, searchsort)
+
+elif filename.rfind('.json') != -1:
+    _mainjson(filename, searchsort)
