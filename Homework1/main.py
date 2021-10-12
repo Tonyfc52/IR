@@ -127,8 +127,9 @@ def _mainjson(filename, search):
 
 # Start here!
 filename = input('Please enter the filename:').rstrip()
-search = input('Please enter the keywords:').split()
+search = input('Please enter the keywords, no hyphen, separating in space:').split()
 searchsort = sorted(search, key=lambda i: len(i), reverse=False)
+print ('_________________________\n')
 
 if path.exists(filename) == False:
     print('File not existed!')
