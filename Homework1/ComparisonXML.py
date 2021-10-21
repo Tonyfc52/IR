@@ -71,11 +71,11 @@ def comparison(paperA, paperB):
                 for j in range(wordnumA):
                     if wordsA[j] != wordsB[j]:
                         if j < 5:
-                            stringA = ' '.join(wordsA[0:j+5])
-                            stringB = ' '.join(wordsB[0:j+5])
+                            stringA = ' '.join(wordsA[0:j+9])
+                            stringB = ' '.join(wordsB[0:j+9])
                         else:
-                            stringA = ' '.join(wordsA[j-5:j+5])
-                            stringB = ' '.join(wordsB[j-5:j+5])
+                            stringA = ' '.join(wordsA[j-5:j+6])
+                            stringB = ' '.join(wordsB[j-5:j+6])
                         print('fileA: ', stringA)
                         print('fileB: ', stringB)
                         notmatch = 1
@@ -102,11 +102,11 @@ def comparison(paperA, paperB):
                 for j in range(wordnumA):
                     if tokenA[j] != tokenB[j]:
                         if j < 5:
-                            stringA = ' '.join(tokenA[0:j+5])
-                            stringB = ' '.join(tokenB[0:j+5])
+                            stringA = ' '.join(tokenA[0:j+9])
+                            stringB = ' '.join(tokenB[0:j+9])
                         else:
-                            stringA = ' '.join(tokenA[j-5:j+5])
-                            stringB = ' '.join(tokenB[j-5:j+5])
+                            stringA = ' '.join(tokenA[j-5:j+6])
+                            stringB = ' '.join(tokenB[j-5:j+6])
                         print('fileA: ', stringA)
                         print('fileB: ', stringB)
                         notmatch = 1
