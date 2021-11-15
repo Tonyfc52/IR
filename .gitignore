@@ -4,3 +4,14 @@ Homework1/Homework 1.docx
 Homework1/Homework 1.pdf
 Homework1/IR01 李冠緯.ipynb
 *.txt
+*.csv
+*.model
+*.xml
+*.npy
+*.pptx
+Homework3/2_dumping and cleaning _re.py
+Homework3/2_dumping and cleaning _spacy.py
+Homework3/3_2_visualized_flu.py
+Homework3/PubmedAPI/old1_pubmed search.py
+Homework3/PubmedAPI/old2_get abstracts.py
+Homework3/PubmedAPI/old3_File search and decompose.py
