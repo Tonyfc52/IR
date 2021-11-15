@@ -8,7 +8,7 @@ engpapers = pandas.DataFrame([{}, {}], columns=['title', 'abstract'])
 serial = csvread.index
 ran10000 = random.sample(set(serial), k=10000)
 i = 0
-while num < 1000:
+while num < 1000:  # 這邊可以改想要取得的篇數，不超過5000篇(因為測試過很多非純英語或內文太短)
     location = ran10000[i]
     csvtitle = csvread.iat[location, 1]
     csvabstract = csvread.iat[location, 2]
@@ -30,4 +30,4 @@ while num < 1000:
     i += 1
 
 
-engpapers.to_csv('10keng.csv', index=False)
+engpapers.to_csv('1ktext.csv', index=False)
