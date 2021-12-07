@@ -44,8 +44,8 @@ def w2vallplot(model):
     all_words = list(model.key_to_index)
     X = model[all_words]
     tsne = TSNE(n_components=2)
-    X_tsne = tsne.fit_transform(X[:500, :])
-    df = pd.DataFrame(X_tsne, index=all_words[:500], columns=['x', 'y'])
+    X_tsne = tsne.fit_transform(X[:1000, :])
+    df = pd.DataFrame(X_tsne, index=all_words[:1000], columns=['x', 'y'])
     fig = plt.figure(figsize=[8, 8])
     ax = fig.add_subplot(1, 1, 1)
     ax.scatter(df['x'], df['y'])
@@ -70,16 +70,16 @@ def w2v2wordplot(model, word1, word2, word3, word4):
     plt.show()
 
 
-model = Word2Vec.load('w2vSG5k.model')
+model = Word2Vec.load('w2vSG5k_mixflu.model')
 vector = model.wv
 shape = vector['vaccine'].shape[0]
-w2vplot(vector, 'fever', shape)
+w2vplot(vector, 'vaccine', shape)
 w2vallplot(vector)
-w2v2wordplot(vector, 'chadox1', 'thrombosis',
-             'bnt162b2', 'pericarditis')
+w2v2wordplot(vector, 'tiv', 'influenza',
+             'bnt162b2', 'covid-19')
 
 result = vector.most_similar(
-    positive=['bnt162b2', 'chadox1'], negative=['pericarditis'])
+    positive=['bnt162b2', 'tiv'], negative=['covid-19'])
 
 for i in result:
     print(i)

@@ -2,8 +2,8 @@ from gensim import models
 from gensim.models import Word2Vec
 
 
-model = Word2Vec.load('w2vCBOW5k.model')
-model1 = Word2Vec.load('w2vSG5k.model')
+model = Word2Vec.load('w2vCBOW5k_w5v300e100.model')
+model1 = Word2Vec.load('w2vSG5k_w5v300e100.model')
 
 
 ans = ''

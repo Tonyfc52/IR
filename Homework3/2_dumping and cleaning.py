@@ -32,15 +32,15 @@ corpus.to_csv('corpus5k.csv', index=False)
 
 print('CBOW start:', time.ctime())
 model = Word2Vec(sentences=filtered, window=5, sg=0,
-                 vector_size=100, min_count=2, epochs=10)
+                 vector_size=300, min_count=2, epochs=100, workers=6)
 print('CBOW end:', time.ctime())
 
-model.save('w2vCBOW5k.model')
+model.save('w2vCBOW5k_w5v300e100.model')
 
 
 print('Skip-Gram start:', time.ctime())
-model1 = Word2Vec(sentences=filtered, window=3, sg=1,
-                  vector_size=100, min_count=2, epochs=5)
+model1 = Word2Vec(sentences=filtered, window=5, sg=1, 
+                  vector_size=300, min_count=2, epochs=100, workers=6)
 print('Skip-Gram end:', time.ctime())
 
-model1.save('w2vSG5k.model')
+model1.save('w2vSG5k_w5v300e100.model')
